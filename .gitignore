@@ -3,7 +3,7 @@ __pycache__/
 *.db
 *.sqlite3
 .env
-GeoLite2-City.mmdb
+# GeoLite2-City.mmdb
 node_modules/
 
 
