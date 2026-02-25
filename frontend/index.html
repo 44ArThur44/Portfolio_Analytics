@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Engineering</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="tree.png" type="image/png" />
+</head>
+
+<body>
+  <nav class="topnav">
+    <div class="container">
+      <div class="links">
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="hero">
+      <h1>Turning Data Into Revenue Decisions</h1>
+      <p class="lead">
+        Data Scientist building production-ready data pipelines and predictive systems.
+      </p>
+    </header>
+
+    <section id="projects" class="projects-grid">
+      <!-- LINK 1 - Customer Segmentation -->
+      <a href="https://medium.com/" target="_blank" rel="noopener"
+        style="text-decoration: none; color: inherit; display: block;">
+        <article class="proj">
+          <img src="segmentation.jpg" alt="Customer Segmentation" />
+          <h2>Customer Segmentation</h2>
+          <p>Built RFM + K-means to identify top 20% customers (65% revenue) and activation windows (7/30/60d). Deployed
+            XGBoost scoring via APIs (<100ms), increasing conversion 32% and reducing CAC 18% ($44→$36).</p>
+        </article>
+      </a>
+
+      <!-- LINK 2 - Sentiment Analysis -->
+      <a href="https://medium.com/" target="_blank" rel="noopener"
+        style="text-decoration: none; color: inherit; display: block;">
+        <article class="proj">
+          <img src="sentiment.jpg" alt="Sentiment Analysis" />
+          <h2>Sentiment Analysis</h2>
+          <p>Architected real-time NLP pipeline (BERT) processing 50K+ daily reviews into CX risk signals. Reduced churn
+            risk 25% across high-value segments.</p>
+        </article>
+      </a>
+
+      <!-- LINK 3 - Recommendation System -->
+      <a href="https://medium.com/" target="_blank" rel="noopener"
+        style="text-decoration: none; color: inherit; display: block;">
+        <article class="proj">
+          <img src="recommendation.jpg" alt="Recommendation System" />
+          <h2>Recommendation System</h2>
+          <p>Scaled collaborative filtering engine serving real-time recommendations inside e-commerce checkout flows.
+            Lifted cross-sell 27%, increased AOV 15%.</p>
+        </article>
+      </a>
+
+      <!-- LINK 4 - Churn Prediction -->
+      <a href="https://medium.com/" target="_blank" rel="noopener"
+        style="text-decoration: none; color: inherit; display: block;">
+        <article class="proj">
+          <img src="churn.jpg" alt="Churn Prediction" />
+          <h2>Churn Prediction with Machine Learning</h2>
+          <p>Developed ensemble churn model (XGBoost + neural nets) predicting at-risk customers 30 days early. Built
+            real-time scoring pipeline feeding Customer Success workflows. Drove 40% retention improvement, preserving
+            $2.3M ARR.</p>
+        </article>
+      </a>
+
+      <!-- NOVO PROJETO - CloudMusic (como ÚLTIMO projeto) -->
+      <a href="https://deploy-cloudmusic.onrender.com" target="_blank" rel="noopener"
+        style="text-decoration: none; color: inherit; display: block; margin-left: 64px;">
+        <article class="proj proj-cloud">
+          <img src="cloudmusic.jpeg" alt="CloudMusic MVP" />
+          <h2>CloudMusic – AI Music Generation</h2>
+          <p>Built full-stack MVP with Flask + Replicate AI. Modular agent-based backend, Stripe monetization and
+            automated CI/CD.</p>
+        </article>
+      </a>
+
+
+    </section>
+
+    <section id="contact" class="section contact">
+      <h2>Contact</h2>
+      <p class="contact-line">
+        <a class="icon-link" href="mailto:arthur.vesaro@gmail.com" aria-label="Email">
+          <img src="gmail-new.png" alt="Email" class="contact-icon" />
+        </a>
+
+        <a class="icon-link" href="https://www.linkedin.com/in/arthur-vesaro-798318239/" target="_blank" rel="noopener"
+          aria-label="LinkedIn">
+          <img src="LI-In-Bug.png" alt="LinkedIn" class="contact-icon" />
+        </a>
+      </p>
+    </section>
+  </main>
+</body>
+
+</html>
