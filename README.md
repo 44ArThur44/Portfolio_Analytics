@@ -1,134 +1,64 @@
-# Portfolio + Visit Tracker
+# Portfolio + Analytics
 
-Backend em **FastAPI** com **SQLite** para rastrear visitas.
+Este projeto inclui um frontend estático em `frontend/` e um backend FastAPI opcional para analytics. O site pode funcionar sem o backend; a API só é necessária quando a coleta de visitas estiver habilitada em produção.
 
-## Como funciona
+## Estrutura
 
-### Backend (`app.py`)
+- `frontend/`: portfolio estático
+- `backend/main.py`: aplicação FastAPI principal para analytics
+- `backend/database.py`: conexão com PostgreSQL via SQLAlchemy
+- `backend/models.py`: modelos `Event` e `User`
+- `backend/routers.py`: endpoints da API
+- `backend/services.py`: anonimização de IP e lookup de país
+- `app.py`: tracker mínimo, separado e não necessário para o deploy principal do portfolio
 
-Um arquivo único com 3 endpoints principais:
+## Variáveis de ambiente
 
-| Endpoint           | Método | O que faz                                |
-| ------------------ | ------ | ---------------------------------------- |
-| `/health`          | GET    | Verifica se o backend está rodando       |
-| `/api/start_visit` | POST   | Inicia uma visita, retorna `visit_id`    |
-| `/api/end_visit`   | POST   | Finaliza visita com tempo gasto          |
-| `/api/stats`       | GET    | Mostra total de visitas e média de tempo |
-
-### O que é rastreado
-
-- **Country + City**: obtido do IP do visitante
-- **Timestamp**: hora exata da visita
-- **Duração**: quantos segundos o usuário ficou na página
-- **User-Agent**: navegador/dispositivo
-
-### Banco de dados
-
-# Guia do Projeto: Backend & Banco de Dados
-
-## 1. Linguagem e Framework
-
-O backend usa **Python** com o framework **FastAPI**. FastAPI é rápido, fácil de usar e ideal para APIs modernas.
-
-## 2. Conexão com Banco de Dados (PostgreSQL)
-
-O backend conecta ao **PostgreSQL** usando SQLAlchemy. A URL do banco deve ser definida na variável de ambiente `DATABASE_URL`:
-
-```
-export DATABASE_URL="postgresql://usuario:senha@localhost:5432/nome_do_banco"
-```
-
-Se não definir, ele usa um padrão local PostgreSQL. Não há fallback para SQLite.
-
-## 3. Endpoints Disponíveis
-
-| Endpoint           | Método | O que faz                                 | Exemplo de uso |
-|--------------------|--------|-------------------------------------------|----------------|
-| `/api/users`       | GET    | Lista todos os usuários                   | curl http://localhost:8000/api/users |
-| `/api/users`       | POST   | Cria um novo usuário                      | curl -X POST http://localhost:8000/api/users -H 'Content-Type: application/json' -d '{"name": "João", "email": "joao@email.com"}' |
-| `/api/visit`       | POST   | Registra uma visita (analytics)           | curl -X POST http://localhost:8000/api/visit -H 'Content-Type: application/json' -d '{"page": "/home"}' |
-| `/api/metrics`     | GET    | Retorna métricas de visitas por país      | curl http://localhost:8000/api/metrics |
-
-## 4. Estrutura dos Arquivos do Backend
-
-```
-backend/
-├── main.py        # Inicializa o FastAPI, rotas e banco
-├── database.py    # Conexão e sessão com PostgreSQL
-├── models.py      # Modelos/tabelas do banco (User, Event)
-├── routers.py     # Rotas da API (visit, metrics)
-├── repository.py  # Funções para gravar/buscar dados
-├── services.py    # Regras de negócio (ex: anonimizar IP, GeoIP)
-└── migrations/    # Scripts SQL para criar tabelas
-```
-
-## 5. Como Rodar o Backend Localmente
+As variáveis realmente relevantes para o backend são:
 
 ```bash
-cd '/home/arthur/Documentos/web 2.0'
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-export DATABASE_URL="postgresql://usuario:senha@localhost:5432/nome_do_banco"
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+export DATABASE_URL="postgresql://user:password@host:5432/dbname"
+export GEOIP_DB="/caminho/para/GeoLite2-City.mmdb"   # opcional
+export VISIT_SALT="change-me"                         # opcional
 ```
 
-## 6. Dicas de Deploy Gratuito e Possíveis Problemas
+- `DATABASE_URL`: obrigatória para o backend funcionar com PostgreSQL.
+- `GEOIP_DB`: opcional; habilita lookup de país com GeoIP.
+- `VISIT_SALT`: opcional; personaliza o hash do IP para anonimização.
 
-- Para deploy gratuito, use serviços como Render, Railway ou Heroku (PostgreSQL incluso).
-- Se a variável `DATABASE_URL` não estiver correta, o backend não salva dados e pode dar erro ao iniciar.
-- O banco precisa existir e estar acessível.
+## Endpoints principais
 
-## 7. Observações sobre SQLite e PostgreSQL
+- `POST /api/visit`: registra uma visita do frontend
+- `GET /api/metrics`: retorna métricas por país
+- `GET /health`: health check disponível no tracker mínimo em `app.py`
 
-- O backend foi migrado para **PostgreSQL** por ser mais robusto e escalável.
-- Não há fallback automático para SQLite.
-- Se quiser usar SQLite para testes, altere manualmente a string de conexão, mas o padrão é PostgreSQL.
+## Deploy
 
-## 8. Fluxo de Dados Básico
-
-- O frontend envia visitas para `/api/visit`.
-- O backend coleta: hash do IP (anonimizado), país (via GeoIP), user-agent e página visitada.
-- Esses dados são gravados na tabela `events`.
-- Métricas podem ser consultadas em `/api/metrics`.
-
-## 9. Configurações Extras
-
-- Para GeoIP, defina a variável `GEOIP_DB` com o caminho do arquivo MaxMind `.mmdb`:
-  ```bash
-  export GEOIP_DB="/caminho/para/GeoLite2-City.mmdb"
-  ```
-- A variável `VISIT_SALT` pode ser usada para customizar o hash do IP.
-
-## Referência Rápida dos Endpoints
+- O frontend pode ser publicado como site estático.
+- O backend FastAPI é opcional e deve ser implantado apenas quando analytics estiver ativado.
+- O backend exige PostgreSQL configurado e acessível via `DATABASE_URL`.
+- Em produção, o app deve iniciar com:
 
 ```bash
-# Listar usuários
-curl http://localhost:8000/api/users
-
-# Criar usuário
-curl -X POST http://localhost:8000/api/users -H 'Content-Type: application/json' -d '{"name": "João", "email": "joao@email.com"}'
-
-# Registrar visita
-curl -X POST http://localhost:8000/api/visit -H 'Content-Type: application/json' -d '{"page": "/home"}'
-
-# Consultar métricas
-curl http://localhost:8000/api/metrics
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
 
----
+A aplicação cria as tabelas automaticamente no startup com `Base.metadata.create_all(...)`.
 
-## Frontend (Resumo)
+## Checklist de prontidão para deploy
 
-- O frontend estático está em `frontend/`.
-- Basta abrir `index.html` no navegador ou rodar:
-  ```bash
-  cd frontend
-  python3 -m http.server 8080
-  ```
-- Ele consome as APIs do backend para mostrar dados e registrar visitas.
+- [ ] Dependências instaladas
+- [ ] `DATABASE_URL` configurada
+- [ ] PostgreSQL disponível e acessível
+- [ ] Health check respondendo
+- [ ] API funcionando
+- [ ] Frontend integrado ao backend (somente se analytics estiver habilitado)
 
----
+## Observações
 
-**Sempre confira a variável `DATABASE_URL` e o arquivo de GeoIP para evitar erros!**
-2. Chama `/api/end_visit` quando o usuário sai (beforeunload)
+- O frontend funciona independentemente do backend.
+- O backend usa PostgreSQL.
+- O tracker em `app.py` é um componente separado e não é obrigatório para o deployment do portfolio.
+
+—> Para deploy em produção, o ponto crítico é a configuração correta do banco e das variáveis de ambiente.
+

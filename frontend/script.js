@@ -1,23 +1,25 @@
-const API_VISIT = "/api/visit";
+// Tracking de visitas temporariamente desabilitado.
+// Mantemos a estrutura pronta para futura reativação, sem disparar requisições para endpoints de analytics.
+const TRACKING_ENABLED = false;
 
-async function sendVisit(page) {
-  try {
-    await fetch(API_VISIT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page }),
-    });
-  } catch (e) {
-    /* non-blocking */
+if (TRACKING_ENABLED) {
+  const API_VISIT = "/api/visit";
+
+  async function sendVisit(page) {
+    try {
+      await fetch(API_VISIT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page }),
+      });
+    } catch (e) {
+      /* non-blocking */
+    }
   }
+
+  sendVisit(location.pathname || "/");
+
+  document.querySelectorAll(".cta").forEach((a) => {
+    a.addEventListener("click", () => sendVisit(`outbound:${a.href}`));
+  });
 }
-
-// send page visit on load
-sendVisit(location.pathname || "/");
-
-// optional: track outbound case-study clicks
-document.querySelectorAll(".cta").forEach((a) => {
-  a.addEventListener("click", () => sendVisit(`outbound:${a.href}`));
-});
-
-// No parallax JS required: background-attachment:fixed handles the effect.

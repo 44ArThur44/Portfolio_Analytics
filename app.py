@@ -1,6 +1,8 @@
 """
 Minimal visit tracking backend.
 FastAPI + SQLite in one file.
+
+Tracking is disabled by default and kept available for future reactivation.
 """
 import sqlite3
 import json
@@ -9,17 +11,23 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import geoip2.database
 import os
 
-# ============================================================================
-# Config
-# ============================================================================
+# ==========================================================================
+# Tracking configuration: disable by default until analytics are re-enabled.
+# ==========================================================================
+TRACKING_ENABLED = False
+
+try:
+    import geoip2.database
+except Exception:  # pragma: no cover - optional dependency for analytics
+    geoip2 = None
+
 DB_FILE = 'visits.db'
 GEOIP_DB = os.getenv('GEOIP_DB')  # Path to MaxMind GeoLite2-City.mmdb
 GEOIP_READER = None
 
-if GEOIP_DB and os.path.exists(GEOIP_DB):
+if TRACKING_ENABLED and geoip2 and GEOIP_DB and os.path.exists(GEOIP_DB):
     GEOIP_READER = geoip2.database.Reader(GEOIP_DB)
 
 # ============================================================================
@@ -115,11 +123,17 @@ def startup():
 
 @app.post('/api/start_visit', response_model=StartVisitResponse)
 def start_visit(request_obj: StartVisitRequest, request: Request):
-    """Start tracking a visit. Returns visit_id."""
+    """Start tracking a visit. Returns visit_id.
+
+    Temporarily disabled by default; kept as a scaffold for future analytics.
+    """
+    if not TRACKING_ENABLED:
+        return {'visit_id': 0, 'message': 'Visit tracking is disabled'}
+
     ip = get_client_ip(request)
     country, city = get_location(ip)
     now = datetime.utcnow().isoformat()
-    
+
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute(
@@ -129,7 +143,7 @@ def start_visit(request_obj: StartVisitRequest, request: Request):
     conn.commit()
     visit_id = c.lastrowid
     conn.close()
-    
+
     return {
         'visit_id': visit_id,
         'message': f'Visit started from {country}/{city}'
@@ -137,11 +151,17 @@ def start_visit(request_obj: StartVisitRequest, request: Request):
 
 @app.post('/api/end_visit', response_model=EndVisitResponse)
 def end_visit(payload: EndVisitRequest):
-    """End a visit and record duration."""
+    """End a visit and record duration.
+
+    Temporarily disabled by default; kept as a scaffold for future analytics.
+    """
+    if not TRACKING_ENABLED:
+        return {'message': 'Visit tracking is disabled'}
+
     visit_id = payload.visit_id
     duration = payload.duration_seconds
     now = datetime.utcnow().isoformat()
-    
+
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute(
@@ -150,33 +170,44 @@ def end_visit(payload: EndVisitRequest):
     )
     conn.commit()
     conn.close()
-    
+
     return {'message': f'Visit {visit_id} ended (duration: {duration}s)'}
 
 @app.get('/api/stats', response_model=StatsResponse)
 def get_stats():
-    """Return aggregated visit stats."""
+    """Return aggregated visit stats.
+
+    Temporarily disabled by default; kept as a scaffold for future analytics.
+    """
+    if not TRACKING_ENABLED:
+        return {
+            'total_visits': 0,
+            'avg_duration_seconds': None,
+            'visits_by_country': {},
+            'visits_by_city': {}
+        }
+
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
-    
+
     # Total visits
     c.execute('SELECT COUNT(*) FROM visits')
     total = c.fetchone()[0]
-    
+
     # Average duration
     c.execute('SELECT AVG(duration_seconds) FROM visits WHERE duration_seconds IS NOT NULL')
     avg_duration = c.fetchone()[0]
-    
+
     # Visits by country
     c.execute('SELECT country, COUNT(*) as cnt FROM visits GROUP BY country ORDER BY cnt DESC')
     by_country = {row[0]: row[1] for row in c.fetchall()}
-    
+
     # Visits by city
     c.execute('SELECT city, COUNT(*) as cnt FROM visits GROUP BY city ORDER BY cnt DESC')
     by_city = {row[0]: row[1] for row in c.fetchall()}
-    
+
     conn.close()
-    
+
     return {
         'total_visits': total,
         'avg_duration_seconds': avg_duration,
