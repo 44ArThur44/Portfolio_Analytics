@@ -82,6 +82,38 @@
       </p>
     </section>
   </main>
+
+  <script>
+    (function () {
+      const nav = document.querySelector('.topnav');
+      if (!nav) return;
+
+      let lastScrollY = window.scrollY;
+
+      const updateNav = () => {
+        if (window.innerWidth > 520) {
+          nav.classList.remove('is-hidden');
+          nav.style.transform = '';
+          lastScrollY = window.scrollY;
+          return;
+        }
+
+        const currentY = window.scrollY;
+
+        if (currentY > lastScrollY && currentY > 20) {
+          nav.classList.add('is-hidden');
+        } else {
+          nav.classList.remove('is-hidden');
+        }
+
+        lastScrollY = currentY;
+      };
+
+      window.addEventListener('scroll', updateNav, { passive: true });
+      window.addEventListener('resize', updateNav);
+      updateNav();
+    })();
+  </script>
 </body>
 
 </html>
